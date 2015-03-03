@@ -4,6 +4,7 @@ Public Class Form1
 
     Private board(7, 7) As Panel
     Private p1turn As Boolean = True
+    Private firstturn As Boolean = True
     Friend rook1 As Integer = 0
     Friend rook2 As Integer = 0
     Friend knight1 As Integer = 0
@@ -96,6 +97,7 @@ Public Class Form1
                 .Player = 2
                 .Size = New Size(50, 50)
                 .TypeIs = 1
+                .PawnFirst = True
             End With
 
             'Add the checker to the panel
@@ -117,6 +119,7 @@ Public Class Form1
                 .Player = 1
                 .Size = New Size(50, 50)
                 .TypeIs = 1
+                .PawnFirst = True
             End With
 
             board(i, y).Controls.Add(check)
@@ -136,6 +139,7 @@ Public Class Form1
                     .Player = 2
                     .Size = New Size(50, 50)
                     .TypeIs = 2
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -158,7 +162,8 @@ Public Class Form1
                     .Location = New Point(2, 2)
                     .Player = 1
                     .Size = New Size(50, 50)
-                    .typeis = 2
+                    .TypeIs = 2
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -182,6 +187,7 @@ Public Class Form1
                     .Player = 2
                     .Size = New Size(50, 50)
                     .TypeIs = 3
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -204,7 +210,8 @@ Public Class Form1
                     .Location = New Point(2, 2)
                     .Player = 1
                     .Size = New Size(50, 50)
-                    .typeis = 3
+                    .TypeIs = 3
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -227,7 +234,8 @@ Public Class Form1
                     .Location = New Point(2, 2)
                     .Player = 2
                     .Size = New Size(50, 50)
-                    .typeis = 4
+                    .TypeIs = 4
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -250,7 +258,8 @@ Public Class Form1
                     .Location = New Point(2, 2)
                     .Player = 1
                     .Size = New Size(50, 50)
-                    .typeis = 4
+                    .TypeIs = 4
+                    .PawnFirst = False
                 End With
 
                 'Add the checker to the panel
@@ -273,7 +282,8 @@ Public Class Form1
                 .Location = New Point(2, 2)
                 .Player = 2
                 .Size = New Size(50, 50)
-                .typeis = 5
+                .TypeIs = 5
+                .PawnFirst = False
             End With
 
             'Add the checker to the panel
@@ -295,7 +305,8 @@ Public Class Form1
                 .Location = New Point(2, 2)
                 .Player = 1
                 .Size = New Size(50, 50)
-                .typeis = 5
+                .TypeIs = 5
+                .PawnFirst = False
             End With
 
             'Add the checker to the panel
@@ -317,7 +328,8 @@ Public Class Form1
                 .Location = New Point(2, 2)
                 .Player = 2
                 .Size = New Size(50, 50)
-                .typeis = 6
+                .TypeIs = 6
+                .PawnFirst = False
             End With
 
             'Add the checker to the panel
@@ -339,7 +351,8 @@ Public Class Form1
                 .Location = New Point(2, 2)
                 .Player = 1
                 .Size = New Size(50, 50)
-                .typeis = 6
+                .TypeIs = 6
+                .PawnFirst = False
             End With
 
             'Add the checker to the panel
@@ -357,51 +370,244 @@ Public Class Form1
         'Get the panel that was just clicked
         Dim pnl_clicked As Panel = DirectCast(sender, Panel)
 
+        If Not (IsNothing(selected_piece)) AndAlso CheckMove(selected_piece, pnl_clicked) Then
+            MovePiece(selected_piece, pnl_clicked)
+        End If
+
     End Sub
 
     Private Sub piece_click(sender As Object, e As EventArgs)
 
+        'Get piece that was just clicked
         Dim piece_clicked As Piece = DirectCast(sender, Piece)
 
-        If Not (IsNothing(selected_piece)) AndAlso selected_piece.Player = piece_clicked.Player Then
+        If Not (IsNothing(selected_piece)) Then
             If piece_clicked Is selected_piece Then
                 'Check to see if the selected pawn is the one that was just clicked
                 'If it was, then just set selected pawn to nothing
                 selected_piece.IsSelected = False
                 selected_piece = Nothing
+            ElseIf piece_clicked.Player <> selected_piece.Player Then
+                If AttackMove(selected_piece, piece_clicked) Then
+                    TakePiece(selected_piece, piece_clicked)
+                Else
+                    selected_piece.IsSelected = False
+                    selected_piece = piece_clicked
+                    piece_clicked.IsSelected = True
+                End If
             Else
-                'If it wasn't the pawn that was just clicked then select it
                 selected_piece = piece_clicked
                 piece_clicked.IsSelected = True
             End If
-        ElseIf selected_piece.Player = piece_clicked.Player Then
-            'If it wasn't the pawn that was just clicked then select it
+        Else
             selected_piece = piece_clicked
             piece_clicked.IsSelected = True
-        ElseIf selected_piece.Player <> piece_clicked.Player Then
-            AttackMove(piece_clicked, selected_piece)
         End If
 
     End Sub
 
-    Private Function CheckMove(ByVal moving_obj As Piece, ByVal pnl_to_move_to As Panel) As Boolean
+    Private Function CheckMove(ByVal moving_piece As Piece, ByVal pnl_to_move_to As Panel) As Boolean
+
+        'Get the x and y number in the board for both panels declared above
+        Dim x_sel, y_sel, x_cur, y_cur As Integer
+        For col As Integer = 0 To board.GetUpperBound(0)
+            For row As Integer = 0 To board.GetUpperBound(1)
+                If board(col, row) Is pnl_to_move_to Then
+                    x_sel = col
+                    y_sel = row
+                End If
+
+                If board(col, row) Is DirectCast(moving_piece.Parent, Panel) Then
+                    x_cur = col
+                    y_cur = row
+                End If
+            Next
+        Next
+
+        If moving_piece.Player = 1 AndAlso p1turn Then
+            If moving_piece.TypeIs = 1 Then
+                If moving_piece.PawnFirst = True Then
+                    If y_cur - y_sel > 0 AndAlso y_cur - y_sel < 3 AndAlso x_sel = x_cur Then
+                        Return True
+                    End If
+                ElseIf y_cur - y_sel > 0 AndAlso y_cur - y_sel < 2 AndAlso x_sel = x_cur Then
+                    Return True
+                End If
+            ElseIf moving_piece.TypeIs = 2 Then
+
+            End If
+        ElseIf moving_piece.Player = 2 AndAlso Not (p1turn) Then
+            If moving_piece.TypeIs = 1 Then
+                If moving_piece.PawnFirst = True Then
+                    If y_sel - y_cur > 0 AndAlso y_sel - y_cur < 3 AndAlso x_sel = x_cur Then
+                        Return True
+                    End If
+                ElseIf y_sel - y_cur > 0 AndAlso y_sel - y_cur < 2 AndAlso x_sel = x_cur Then
+                    Return True
+                End If
+            End If
+            Return False
+        End If
 
         Return False
 
     End Function
 
-    Private Sub MovePiece(ByVal moving_piece As Piece, ByVal pnl_to_move_to As Panel)
+    Private Sub MovePiece(ByVal moving_checker As Piece, ByVal pnl_to_move_to As Panel)
 
+        'Unselect the moving checker
+        moving_checker.IsSelected = False
 
+        'Clear the controls from the old panel
+        Dim moving_from_pnl As Panel = DirectCast(moving_checker.Parent, Panel)
+        moving_from_pnl.Controls.Clear()
+
+        'Add the checker to the new panel
+        pnl_to_move_to.Controls.Add(moving_checker)
+
+        'Get the y diminsion to see if we should make it a king
+        'If moving_checker.TypeIs = 1 Then
+        '    For x As Integer = 0 To board.GetUpperBound(0)
+        '        For y As Integer = 0 To board.GetUpperBound(1)
+        '            If board(x, y) Is pnl_to_move_to Then
+        '                If moving_checker.Player = 1 AndAlso y = 0 Then
+        '                    'moving_checker.IsKing = True
+        '                ElseIf moving_checker.Player = 2 AndAlso y = 7 Then
+        '                    'moving_checker.IsKing = True
+        '                End If
+        '                Exit For
+        '            End If
+        '        Next
+        '    Next
+        'End If
+
+        If moving_checker.TypeIs = 1 Then
+            moving_checker.PawnFirst = False
+        End If
+
+        'It's the other person's turn
+        p1turn = Not (p1turn)
+
+        'Set the selected_checker to nothing
+        selected_piece = Nothing
+
+        'Check if there's a winner winner chicken dinner
+        Call CheckWin()
 
     End Sub
 
-    Private Sub AttackMove(ByVal attacker As Piece, ByVal victim As Piece)
+    Private Function AttackMove(ByVal attacker As Piece, ByVal victim As Piece) As Boolean
 
-        If attacker.Player <> victim.Player Then
+        'Get the x and y number in the board for both panels declared above
+        Dim x_sel, y_sel, x_cur, y_cur As Integer
+        For col As Integer = 0 To board.GetUpperBound(0)
+            For row As Integer = 0 To board.GetUpperBound(1)
+                If board(col, row) Is DirectCast(victim.Parent, Panel) Then
+                    x_sel = col
+                    y_sel = row
+                End If
 
-        Else
+                If board(col, row) Is DirectCast(attacker.Parent, Panel) Then
+                    x_cur = col
+                    y_cur = row
+                End If
+            Next
+        Next
 
+        If attacker.Player = 1 AndAlso p1turn Then
+            If attacker.TypeIs = 1 Then
+                If (x_cur - x_sel = 1 AndAlso y_cur - y_sel = 1) Or (x_cur - x_sel = -1 AndAlso y_cur - y_sel = 1) Then
+                    Return True
+                End If
+            End If
+        ElseIf attacker.Player = 2 AndAlso Not p1turn Then
+            If attacker.TypeIs = 1 Then
+                If (x_sel - x_cur = -1 AndAlso y_sel - y_cur = 1) Or (x_sel - x_cur = 1 AndAlso y_sel - y_cur = 1) Then
+                    Return True
+                End If
+            End If
+        End If
+
+        Return False
+
+    End Function
+
+    Private Sub TakePiece(ByVal attacker As Piece, ByVal victim As Piece)
+
+        'Unselect the moving checker
+        attacker.IsSelected = False
+
+        'Clear the controls from the old panel
+        Dim moving_from_pnl As Panel = DirectCast(attacker.Parent, Panel)
+        moving_from_pnl.Controls.Clear()
+
+        'Add the checker to the new panel
+        Dim victim_place As Panel = DirectCast(victim.Parent, Panel)
+        victim_place.Controls.Clear()
+        victim_place.Controls.Add(attacker)
+
+        'Get the y diminsion to see if we should make it a king
+        'If moving_checker.TypeIs = 1 Then
+        '    For x As Integer = 0 To board.GetUpperBound(0)
+        '        For y As Integer = 0 To board.GetUpperBound(1)
+        '            If board(x, y) Is pnl_to_move_to Then
+        '                If moving_checker.Player = 1 AndAlso y = 0 Then
+        '                    'moving_checker.IsKing = True
+        '                ElseIf moving_checker.Player = 2 AndAlso y = 7 Then
+        '                    'moving_checker.IsKing = True
+        '                End If
+        '                Exit For
+        '            End If
+        '        Next
+        '    Next
+        'End If
+
+        If attacker.TypeIs = 1 Then
+            attacker.PawnFirst = False
+        End If
+
+        'It's the other person's turn
+        p1turn = Not (p1turn)
+
+        'Set the selected_checker to nothing
+        selected_piece = Nothing
+
+        'Check if there's a winner winner chicken dinner
+        Call CheckWin()
+
+    End Sub
+
+    Private Sub CheckWin()
+
+        Dim p1_count As Integer = 0
+        Dim p2_count As Integer = 0
+
+        'Loop through the board
+        For x As Integer = 0 To board.GetUpperBound(0)
+            For y As Integer = 0 To board.GetUpperBound(1)
+                'Check if the panel has a checker
+                If board(x, y).Controls.Count > 0 Then
+                    'Check if the checker is p1 or p2
+                    Dim check As Piece = DirectCast(board(x, y).Controls(0), Piece)
+
+                    If check.Player = 1 Then
+                        p1_count += 1
+                    ElseIf check.Player = 2 Then
+                        p2_count += 1
+                    End If
+                End If
+            Next
+        Next
+
+        'Check if p1 or p2 count is 0
+        If p1_count = 0 Then
+            MessageBox.Show("Player2 wins!")
+
+            Call NewGame()
+        ElseIf p2_count = 0 Then
+            MessageBox.Show("Player1 wins!")
+
+            Call NewGame()
         End If
 
     End Sub
