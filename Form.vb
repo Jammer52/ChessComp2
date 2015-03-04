@@ -424,8 +424,11 @@ Public Class Form1
             Next
         Next
 
+        'player 1
         If moving_piece.Player = 1 AndAlso p1turn Then
+            'pawn piece
             If moving_piece.TypeIs = 1 Then
+                'pawn hasn't moved yet
                 If moving_piece.PawnFirst = True Then
                     If y_cur - y_sel > 0 AndAlso y_cur - y_sel < 3 AndAlso x_sel = x_cur Then
                         Return True
@@ -433,17 +436,135 @@ Public Class Form1
                 ElseIf y_cur - y_sel > 0 AndAlso y_cur - y_sel < 2 AndAlso x_sel = x_cur Then
                     Return True
                 End If
+                'rook piece
             ElseIf moving_piece.TypeIs = 2 Then
-
+                If x_cur = x_sel Or y_sel = y_cur Then
+                    If x_cur = x_sel Then
+                        'for loop for all panels in a straight line on x
+                        If y_cur - y_sel >= 1 Then
+                            For i As Integer = y_sel To y_cur - 1
+                                Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = y_cur - 1 Then
+                                    Return True
+                                End If
+                            Next
+                        ElseIf y_cur - y_sel <= -1 Then
+                            For i As Integer = y_cur + 1 To y_sel
+                                Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = y_sel Then
+                                    Return True
+                                End If
+                            Next
+                        End If
+                    ElseIf y_cur = y_sel Then
+                        'for loop for all panels in a straight line on y
+                        If x_cur - x_sel >= 1 Then
+                            For i As Integer = x_sel To x_cur - 1
+                                Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = x_cur - 1 Then
+                                    Return True
+                                End If
+                            Next
+                        ElseIf x_cur - x_sel <= -1 Then
+                            For i As Integer = x_cur + 1 To x_sel
+                                Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = x_sel Then
+                                    Return True
+                                End If
+                            Next
+                        End If
+                    End If
+                End If
             End If
+            'player 2
         ElseIf moving_piece.Player = 2 AndAlso Not (p1turn) Then
+            'pawn piece
             If moving_piece.TypeIs = 1 Then
+                'pawn hasn't moved yet
                 If moving_piece.PawnFirst = True Then
                     If y_sel - y_cur > 0 AndAlso y_sel - y_cur < 3 AndAlso x_sel = x_cur Then
                         Return True
                     End If
                 ElseIf y_sel - y_cur > 0 AndAlso y_sel - y_cur < 2 AndAlso x_sel = x_cur Then
                     Return True
+                End If
+            ElseIf moving_piece.TypeIs = 2 Then
+                If x_cur = x_sel Or y_sel = y_cur Then
+                    If x_cur = x_sel Then
+                        'for loop for all panels in a straight line on x
+                        If y_cur - y_sel >= 1 Then
+                            For i As Integer = y_sel To y_cur - 1
+                                Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = y_cur - 1 Then
+                                    Return True
+                                End If
+                            Next
+                        ElseIf y_cur - y_sel <= -1 Then
+                            For i As Integer = y_cur + 1 To y_sel
+                                Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = y_sel Then
+                                    Return True
+                                End If
+                            Next
+                        End If
+                    ElseIf y_cur = y_sel Then
+                        'for loop for all panels in a straight line on y
+                        If x_cur - x_sel >= 1 Then
+                            For i As Integer = x_sel To x_cur - 1
+                                Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = x_cur - 1 Then
+                                    Return True
+                                End If
+                            Next
+                        ElseIf x_cur - x_sel <= -1 Then
+                            For i As Integer = x_cur + 1 To x_sel
+                                Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                'if it has a piece the return false
+                                If pnl.Controls.Count = 1 Then
+                                    Return False
+                                End If
+                                'if it went through all of them and nothing then return true
+                                If i = x_sel Then
+                                    Return True
+                                End If
+                            Next
+                        End If
+                    End If
                 End If
             End If
             Return False
@@ -519,6 +640,8 @@ Public Class Form1
                 If (x_cur - x_sel = 1 AndAlso y_cur - y_sel = 1) Or (x_cur - x_sel = -1 AndAlso y_cur - y_sel = 1) Then
                     Return True
                 End If
+            ElseIf attacker.TypeIs = 2 Then
+
             End If
         ElseIf attacker.Player = 2 AndAlso Not p1turn Then
             If attacker.TypeIs = 1 Then
