@@ -2,17 +2,37 @@ Option Strict On
 Option Explicit On
 Public Class Form1
 
+    'get rid of attackmove
+    'put all attack moves in the checkmove sub
+    'do this by having another if statement
+
+    'if panel.count > 0 then
+    'takepiece(moving_piece, pnl_to_move_to)
+    'end if
+
+    'something along those lines
+    'in takepiece, have another if statement
+
+    'if piece.typeis = 1 (isn't a pawn the only one that has different attack parameters than when it moves?) then
+    'if (x_cur - x_sel = 1 AndAlso y_cur - y_sel = 1) Or (x_cur - x_sel = -1 AndAlso y_cur - y_sel = 1) Then
+    'exit if (the code continues on to delete the piece that is being attacked)
+    'else
+    'exit sub (nothing will happen because it was a failure)
+    'end if
+    'end if
+
+    'then it returns false because the piece has already been moved, so the code won't go into movepiece()
     Private board(7, 7) As Panel
     Private p1turn As Boolean = True
     Private firstturn As Boolean = True
-    Friend rook1 As Integer = 0
-    Friend rook2 As Integer = 0
-    Friend knight1 As Integer = 0
-    Friend knight2 As Integer = 0
-    Friend bishop1 As Integer = 0
-    Friend bishop2 As Integer = 0
-    Friend queen1 As Integer = 0
-    Friend queen2 As Integer = 0
+    Friend rook1 As Integer = 2
+    Friend rook2 As Integer = 2
+    Friend knight1 As Integer = 2
+    Friend knight2 As Integer = 2
+    Friend bishop1 As Integer = 2
+    Friend bishop2 As Integer = 2
+    Friend queen1 As Integer = 1
+    Friend queen2 As Integer = 1
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
         'Set up a new game
@@ -33,11 +53,14 @@ Public Class Form1
 
     Private Sub NewGame()
 
+        'clears all controls on board
         Me.Controls.Clear()
 
+        'loads board and pieces
         Call LoadBoard()
         Call LoadPieces()
 
+        'player1 turn
         p1turn = True
 
     End Sub
@@ -380,6 +403,7 @@ Public Class Form1
 
         'Get piece that was just clicked
         Dim piece_clicked As Piece = DirectCast(sender, Piece)
+        Dim attack_pnl As Panel = DirectCast(piece_clicked.Parent, Panel)
 
         If Not (IsNothing(selected_piece)) Then
             If piece_clicked Is selected_piece Then
@@ -567,7 +591,6 @@ Public Class Form1
                     End If
                 End If
             End If
-            Return False
         End If
 
         Return False
@@ -578,6 +601,9 @@ Public Class Form1
 
         'Unselect the moving checker
         moving_checker.IsSelected = False
+
+        'Check if there's a winner winner chicken dinner
+        'Call CheckWin()
 
         'Clear the controls from the old panel
         Dim moving_from_pnl As Panel = DirectCast(moving_checker.Parent, Panel)
@@ -612,9 +638,6 @@ Public Class Form1
         'Set the selected_checker to nothing
         selected_piece = Nothing
 
-        'Check if there's a winner winner chicken dinner
-        Call CheckWin()
-
     End Sub
 
     Private Function AttackMove(ByVal attacker As Piece, ByVal victim As Piece) As Boolean
@@ -641,13 +664,115 @@ Public Class Form1
                     Return True
                 End If
             ElseIf attacker.TypeIs = 2 Then
+                
+                If x_sel = x_cur Then
+                    If y_cur - y_sel > 0 Then
+                        For i As Integer = y_sel To y_cur
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf y_cur - y_sel < 0 Then
+                        For i As Integer = y_cur To y_sel
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                ElseIf y_sel = y_cur Then
+                    If x_cur - x_sel > 0 Then
+                        For i As Integer = x_sel To x_cur
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf x_cur - x_sel < 0 Then
+                        For i As Integer = x_cur To x_sel
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                End If
 
-            End If
+                End If
         ElseIf attacker.Player = 2 AndAlso Not p1turn Then
             If attacker.TypeIs = 1 Then
                 If (x_sel - x_cur = -1 AndAlso y_sel - y_cur = 1) Or (x_sel - x_cur = 1 AndAlso y_sel - y_cur = 1) Then
                     Return True
                 End If
+            ElseIf attacker.TypeIs = 2 Then
+
+                If x_sel = x_cur Then
+                    If y_sel - y_cur > 0 Then
+                        For i As Integer = y_cur To y_sel
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf y_sel - y_cur < 0 Then
+                        For i As Integer = y_cur To y_sel
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                ElseIf y_sel = y_cur Then
+                    If x_sel - x_cur > 0 Then
+                        For i As Integer = x_cur To x_sel
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf x_sel - x_cur < 0 Then
+                        For i As Integer = x_sel To x_cur
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                End If
+
             End If
         End If
 
@@ -696,31 +821,39 @@ Public Class Form1
         selected_piece = Nothing
 
         'Check if there's a winner winner chicken dinner
-        Call CheckWin()
+        Call CheckWin(victim)
 
     End Sub
 
-    Private Sub CheckWin()
+    Private Sub CheckWin(sender As Piece)
 
-        Dim p1_count As Integer = 0
-        Dim p2_count As Integer = 0
+        Dim p1_count As Integer = 1
+        Dim p2_count As Integer = 1
 
-        'Loop through the board
-        For x As Integer = 0 To board.GetUpperBound(0)
-            For y As Integer = 0 To board.GetUpperBound(1)
-                'Check if the panel has a checker
-                If board(x, y).Controls.Count > 0 Then
-                    'Check if the checker is p1 or p2
-                    Dim check As Piece = DirectCast(board(x, y).Controls(0), Piece)
+        ''Loop through the board
+        'For x As Integer = 0 To board.GetUpperBound(0)
+        '    For y As Integer = 0 To board.GetUpperBound(1)
+        '        'Check if the panel has a checker
+        '        If board(x, y).Controls.Count > 0 Then
+        '            'Check if the checker is p1 or p2
+        '            Dim check As Piece = DirectCast(board(x, y).Controls(0), Piece)
 
-                    If check.Player = 1 Then
-                        p1_count += 1
-                    ElseIf check.Player = 2 Then
-                        p2_count += 1
-                    End If
-                End If
-            Next
-        Next
+        '            If check.Player = 1 Then
+        '                p1_count += 1
+        '            ElseIf check.Player = 2 Then
+        '                p2_count += 1
+        '            End If
+        '        End If
+        '    Next
+        'Next
+
+        If sender.TypeIs = 5 Then
+            If sender.Player = 1 Then
+                p1_count = 0
+            ElseIf sender.Player = 2 Then
+                p2_count = 0
+            End If
+        End If
 
         'Check if p1 or p2 count is 0
         If p1_count = 0 Then
