@@ -1,4 +1,4 @@
-'Not Completed
+'Not Completed Bishop Movement
  ElseIf moving_piece.TypeIs = 4 Then
                 If (x_sel - x_cur) / (y_sel - y_cur) = -1 Then
                     For i As Integer = x_sel - x_cur To x_sel
@@ -25,3 +25,4 @@
                         End If
                     Next
                 End If
+ 'Not Completed Bishop Attack
