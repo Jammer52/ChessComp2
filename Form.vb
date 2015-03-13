@@ -1,38 +1,10 @@
 Option Strict On
 Option Explicit On
 Public Class Form1
-
-    'get rid of attackmove
-    'put all attack moves in the checkmove sub
-    'do this by having another if statement
-
-    'if panel.count > 0 then
-    'takepiece(moving_piece, pnl_to_move_to)
-    'end if
-
-    'something along those lines
-    'in takepiece, have another if statement
-
-    'if piece.typeis = 1 (isn't a pawn the only one that has different attack parameters than when it moves?) then
-    'if (x_cur - x_sel = 1 AndAlso y_cur - y_sel = 1) Or (x_cur - x_sel = -1 AndAlso y_cur - y_sel = 1) Then
-    'exit if (the code continues on to delete the piece that is being attacked)
-    'else
-    'exit sub (nothing will happen because it was a failure)
-    'end if
-    'end if
-
-    'then it returns false because the piece has already been moved, so the code won't go into movepiece()
     Private board(7, 7) As Panel
     Private p1turn As Boolean = True
-    Private firstturn As Boolean = True
-    Friend rook1 As Integer = 2
-    Friend rook2 As Integer = 2
-    Friend knight1 As Integer = 2
-    Friend knight2 As Integer = 2
-    Friend bishop1 As Integer = 2
-    Friend bishop2 As Integer = 2
-    Friend queen1 As Integer = 1
-    Friend queen2 As Integer = 1
+    Friend castle1 As Boolean = False
+    Friend castle2 As Boolean = False
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
         'Set up a new game
@@ -306,7 +278,7 @@ Public Class Form1
                 .Player = 2
                 .Size = New Size(50, 50)
                 .TypeIs = 5
-                .PawnFirst = False
+                .PawnFirst = True
             End With
 
             'Add the checker to the panel
@@ -329,7 +301,7 @@ Public Class Form1
                 .Player = 1
                 .Size = New Size(50, 50)
                 .TypeIs = 5
-                .PawnFirst = False
+                .PawnFirst = True
             End With
 
             'Add the checker to the panel
@@ -519,20 +491,169 @@ Public Class Form1
                         End If
                     End If
                 End If
-            End If
-            'player 2
-        ElseIf moving_piece.Player = 2 AndAlso Not (p1turn) Then
-            'pawn piece
-            If moving_piece.TypeIs = 1 Then
-                'pawn hasn't moved yet
-                If moving_piece.PawnFirst = True Then
-                    If y_sel - y_cur > 0 AndAlso y_sel - y_cur < 3 AndAlso x_sel = x_cur Then
-                        Return True
-                    End If
-                ElseIf y_sel - y_cur > 0 AndAlso y_sel - y_cur < 2 AndAlso x_sel = x_cur Then
+            ElseIf moving_piece.TypeIs = 3 Then
+                If x_sel = x_cur - 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 2 Then
                     Return True
                 End If
-            ElseIf moving_piece.TypeIs = 2 Then
+            ElseIf moving_piece.TypeIs = 4 Then
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+                If y_cur - y_sel = x_cur - x_sel Or y_sel - y_cur = x_sel - x_cur Or y_sel - y_cur = x_cur - x_sel Or y_cur - y_sel = x_sel - x_cur Then
+                    If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    End If
+                End If
+            ElseIf moving_piece.TypeIs = 5 Then
+                'If moving_piece.PawnFirst = True Then
+                '    If y_sel = y_cur Then
+                '        If x_sel - x_cur = 2 Then
+                '            If board(4, 7).Controls.Count = 0 And board(5, 7).Controls.Count = 0 And board(6, 7).Controls.Count = 0 Then
+                '                Dim rookpnl1p1 As Panel = DirectCast(board(7, 7), Panel)
+                '                Dim rook1p1 As Piece = DirectCast(rookpnl1p1.Parent, Piece)
+                '                If rook1p1.PawnFirst = True Then
+                '                    castle1 = True
+                '                    Return True
+                '                Else : Return False
+                '                End If
+                '            End If
+                '        ElseIf x_cur - x_sel = 2 Then
+                '            If board(1, 7).Controls.Count = 0 And board(2, 7).Controls.Count = 0 Then
+                '                Dim rookpnl2p1 As Panel = DirectCast(board(0, 7), Panel)
+                '                Dim rook1p1 As Piece = DirectCast(rookpnl2p1.Parent, Piece)
+                '                If rook1p1.PawnFirst = True Then
+                '                    castle1 = True
+                '                    Return True
+                '                Else : Return False
+                '                End If
+                '            End If
+                '        End If
+                '    End If
+                'End If
+                If x_sel = x_cur - 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur - 1 Then
+                    Return True
+                End If
+            ElseIf moving_piece.TypeIs = 6 Then
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+
+                If y_cur - y_sel = x_cur - x_sel Or y_sel - y_cur = x_sel - x_cur Or y_sel - y_cur = x_cur - x_sel Or y_cur - y_sel = x_sel - x_cur Then
+                    If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    End If
+                End If
+
                 If x_cur = x_sel Or y_sel = y_cur Then
                     If x_cur = x_sel Then
                         'for loop for all panels in a straight line on x
@@ -591,13 +712,308 @@ Public Class Form1
                     End If
                 End If
             End If
-        End If
 
-        Return False
+            'player 2
+            ElseIf moving_piece.Player = 2 AndAlso Not (p1turn) Then
+                'pawn piece
+                If moving_piece.TypeIs = 1 Then
+                    'pawn hasn't moved yet
+                    If moving_piece.PawnFirst = True Then
+                        If y_sel - y_cur > 0 AndAlso y_sel - y_cur < 3 AndAlso x_sel = x_cur Then
+                            Return True
+                        End If
+                    ElseIf y_sel - y_cur > 0 AndAlso y_sel - y_cur < 2 AndAlso x_sel = x_cur Then
+                        Return True
+                    End If
+                ElseIf moving_piece.TypeIs = 2 Then
+                    If x_cur = x_sel Or y_sel = y_cur Then
+                        If x_cur = x_sel Then
+                            'for loop for all panels in a straight line on x
+                            If y_cur - y_sel >= 1 Then
+                                For i As Integer = y_sel To y_cur - 1
+                                    Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = y_cur - 1 Then
+                                        Return True
+                                    End If
+                                Next
+                            ElseIf y_cur - y_sel <= -1 Then
+                                For i As Integer = y_cur + 1 To y_sel
+                                    Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = y_sel Then
+                                        Return True
+                                    End If
+                                Next
+                            End If
+                        ElseIf y_cur = y_sel Then
+                            'for loop for all panels in a straight line on y
+                            If x_cur - x_sel >= 1 Then
+                                For i As Integer = x_sel To x_cur - 1
+                                    Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = x_cur - 1 Then
+                                        Return True
+                                    End If
+                                Next
+                            ElseIf x_cur - x_sel <= -1 Then
+                                For i As Integer = x_cur + 1 To x_sel
+                                    Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = x_sel Then
+                                        Return True
+                                    End If
+                                Next
+                            End If
+                        End If
+                    End If
+                ElseIf moving_piece.TypeIs = 3 Then
+                    If x_sel = x_cur - 2 And y_sel = y_cur - 1 Then
+                        Return True
+                    ElseIf x_sel = x_cur - 2 And y_sel = y_cur + 1 Then
+                        Return True
+                    ElseIf x_sel = x_cur + 2 And y_sel = y_cur - 1 Then
+                        Return True
+                    ElseIf x_sel = x_cur + 2 And y_sel = y_cur + 1 Then
+                        Return True
+                    ElseIf x_sel = x_cur - 1 And y_sel = y_cur - 2 Then
+                        Return True
+                    ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 2 Then
+                        Return True
+                    ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 2 Then
+                        Return True
+                    ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 2 Then
+                        Return True
+                    End If
+                ElseIf moving_piece.TypeIs = 4 Then
+                    Dim x_check As Integer = x_cur
+                    Dim y_check As Integer = y_cur
+
+                If y_cur - y_sel = x_cur - x_sel Or y_sel - y_cur = x_sel - x_cur Or y_sel - y_cur = x_cur - x_sel Or y_cur - y_sel = x_sel - x_cur Then
+                    If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    End If
+                End If
+            ElseIf moving_piece.TypeIs = 5 Then
+                'If moving_piece.PawnFirst = True Then
+                '    If y_sel = y_cur Then
+                '        If x_sel - x_cur = 2 Then
+                '            If board(4, 0).Controls.Count = 0 And board(5, 0).Controls.Count = 0 And board(6, 0).Controls.Count = 0 Then
+                '                Dim rookpnl1p2 As Panel = DirectCast(board(7, 0), Panel)
+                '                Dim rook1p1 As Piece = DirectCast(rookpnl1p2.Parent, Piece)
+                '                If rook1p1.PawnFirst = True Then
+                '                    castle1 = True
+                '                    Return True
+                '                Else : Return False
+                '                End If
+                '            End If
+                '        ElseIf x_cur - x_sel = 2 Then
+                '            If board(1, 0).Controls.Count = 0 And board(2, 0).Controls.Count = 0 Then
+                '                Dim rookpnl2p2 As Panel = DirectCast(board(0, 0), Panel)
+                '                Dim rook1p1 As Piece = DirectCast(rookpnl2p2.Parent, Piece)
+                '                If rook1p1.PawnFirst = True Then
+                '                    castle1 = True
+                '                    Return True
+                '                Else : Return False
+                '                End If
+                '            End If
+                '        End If
+                '    End If
+                'End If
+                If x_sel = x_cur - 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur - 1 Then
+                    Return True
+                End If
+                ElseIf moving_piece.TypeIs = 6 Then
+                    Dim x_check As Integer = x_cur
+                    Dim y_check As Integer = y_cur
+
+                If y_cur - y_sel = x_cur - x_sel Or y_sel - y_cur = x_sel - x_cur Or y_sel - y_cur = x_cur - x_sel Or y_cur - y_sel = x_sel - x_cur Then
+                    If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT TOP
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check -= 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                        'TO THE RIGHT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check += 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                        'TO THE LEFT BOTTOM
+                        Do Until y_check = y_sel And x_check = x_sel
+                            y_check += 1
+                            x_check -= 1
+                            Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                            If pnl.Controls.Count = 1 Then
+                                Return False
+                            End If
+                        Loop
+                        Return True
+                    End If
+                End If
+
+                    If x_cur = x_sel Or y_sel = y_cur Then
+                        If x_cur = x_sel Then
+                            'for loop for all panels in a straight line on x
+                            If y_cur - y_sel >= 1 Then
+                                For i As Integer = y_sel To y_cur - 1
+                                    Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = y_cur - 1 Then
+                                        Return True
+                                    End If
+                                Next
+                            ElseIf y_cur - y_sel <= -1 Then
+                                For i As Integer = y_cur + 1 To y_sel
+                                    Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = y_sel Then
+                                        Return True
+                                    End If
+                                Next
+                            End If
+                        ElseIf y_cur = y_sel Then
+                            'for loop for all panels in a straight line on y
+                            If x_cur - x_sel >= 1 Then
+                                For i As Integer = x_sel To x_cur - 1
+                                    Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = x_cur - 1 Then
+                                        Return True
+                                    End If
+                                Next
+                            ElseIf x_cur - x_sel <= -1 Then
+                                For i As Integer = x_cur + 1 To x_sel
+                                    Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                                    'if it has a piece the return false
+                                    If pnl.Controls.Count = 1 Then
+                                        Return False
+                                    End If
+                                    'if it went through all of them and nothing then return true
+                                    If i = x_sel Then
+                                        Return True
+                                    End If
+                                Next
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+
+            Return False
 
     End Function
 
     Private Sub MovePiece(ByVal moving_checker As Piece, ByVal pnl_to_move_to As Panel)
+
+        Dim s As String = "0"
 
         'Unselect the moving checker
         moving_checker.IsSelected = False
@@ -609,26 +1025,50 @@ Public Class Form1
         Dim moving_from_pnl As Panel = DirectCast(moving_checker.Parent, Panel)
         moving_from_pnl.Controls.Clear()
 
+        'Get the y diminsion to see if we should make it a king
+        If moving_checker.TypeIs = 1 Then
+            For x As Integer = 0 To board.GetUpperBound(0)
+                For y As Integer = 0 To board.GetUpperBound(1)
+                    If board(x, y) Is pnl_to_move_to Then
+                        If moving_checker.Player = 1 AndAlso y = 0 Then
+                            Do Until IsNumeric(s) = True And CInt(s) < 5 And CInt(s) > 0
+                                s = InputBox("Please select what piece you want" & vbCrLf & vbTab & "1 - Queen" & vbCrLf & vbTab & "2 - Rook" & vbCrLf & vbTab & "3 - Bishop" & vbCrLf & vbTab & "4 - Knight", "Piece Chooser")
+                            Loop
+                            Select Case s
+                                Case "1"
+                                    moving_checker.TypeIs = 6
+                                Case "2"
+                                    moving_checker.TypeIs = 2
+                                Case "3"
+                                    moving_checker.TypeIs = 4
+                                Case "4"
+                                    moving_checker.TypeIs = 3
+                            End Select
+                        ElseIf moving_checker.Player = 2 AndAlso y = 7 Then
+                            Do Until IsNumeric(s) = True And CInt(s) < 5 And CInt(s) > 0
+                                s = InputBox("Please select what piece you want" & vbCrLf & vbTab & "1 - Queen" & vbCrLf & vbTab & "2 - Rook" & vbCrLf & vbTab & "3 - Bishop" & vbCrLf & vbTab & "4 - Knight", "Piece Chooser")
+                            Loop
+                            Select Case s
+                                Case "1"
+                                    moving_checker.TypeIs = 6
+                                Case "2"
+                                    moving_checker.TypeIs = 2
+                                Case "3"
+                                    moving_checker.TypeIs = 4
+                                Case "4"
+                                    moving_checker.TypeIs = 3
+                            End Select
+                        End If
+                        Exit For
+                    End If
+                Next
+            Next
+        End If
+
         'Add the checker to the new panel
         pnl_to_move_to.Controls.Add(moving_checker)
 
-        'Get the y diminsion to see if we should make it a king
-        'If moving_checker.TypeIs = 1 Then
-        '    For x As Integer = 0 To board.GetUpperBound(0)
-        '        For y As Integer = 0 To board.GetUpperBound(1)
-        '            If board(x, y) Is pnl_to_move_to Then
-        '                If moving_checker.Player = 1 AndAlso y = 0 Then
-        '                    'moving_checker.IsKing = True
-        '                ElseIf moving_checker.Player = 2 AndAlso y = 7 Then
-        '                    'moving_checker.IsKing = True
-        '                End If
-        '                Exit For
-        '            End If
-        '        Next
-        '    Next
-        'End If
-
-        If moving_checker.TypeIs = 1 Then
+        If moving_checker.TypeIs = 1 Or moving_checker.TypeIs = 5 Or moving_checker.TypeIs = 2 Then
             moving_checker.PawnFirst = False
         End If
 
@@ -660,11 +1100,13 @@ Public Class Form1
 
         If attacker.Player = 1 AndAlso p1turn Then
             If attacker.TypeIs = 1 Then
+
                 If (x_cur - x_sel = 1 AndAlso y_cur - y_sel = 1) Or (x_cur - x_sel = -1 AndAlso y_cur - y_sel = 1) Then
                     Return True
                 End If
+
             ElseIf attacker.TypeIs = 2 Then
-                
+
                 If x_sel = x_cur Then
                     If y_cur - y_sel > 0 Then
                         For i As Integer = y_sel To y_cur
@@ -715,12 +1157,206 @@ Public Class Form1
                     End If
                 End If
 
+            ElseIf attacker.TypeIs = 3 Then
+                If x_sel = x_cur - 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 2 Then
+                    Return True
                 End If
+
+            ElseIf attacker.TypeIs = 4 Then
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+                Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+
+                If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                End If
+
+            ElseIf attacker.TypeIs = 5 Then
+                If x_sel = x_cur - 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur - 1 Then
+                    Return True
+                End If
+
+            ElseIf attacker.TypeIs = 6 Then
+                If x_sel = x_cur Then
+                    If y_cur - y_sel > 0 Then
+                        For i As Integer = y_sel To y_cur
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf y_cur - y_sel < 0 Then
+                        For i As Integer = y_cur To y_sel
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                ElseIf y_sel = y_cur Then
+                    If x_cur - x_sel > 0 Then
+                        For i As Integer = x_sel To x_cur
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf x_cur - x_sel < 0 Then
+                        For i As Integer = x_cur To x_sel
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                End If
+
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+                Dim attpnl1 As Panel = DirectCast(attacker.Parent, Panel)
+                Dim vicpnl1 As Panel = DirectCast(victim.Parent, Panel)
+
+                If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                End If
+
+            End If
         ElseIf attacker.Player = 2 AndAlso Not p1turn Then
+
             If attacker.TypeIs = 1 Then
                 If (x_sel - x_cur = -1 AndAlso y_sel - y_cur = 1) Or (x_sel - x_cur = 1 AndAlso y_sel - y_cur = 1) Then
                     Return True
                 End If
+
             ElseIf attacker.TypeIs = 2 Then
 
                 If x_sel = x_cur Then
@@ -773,6 +1409,198 @@ Public Class Form1
                     End If
                 End If
 
+            ElseIf attacker.TypeIs = 3 Then
+                If x_sel = x_cur - 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 2 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 2 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 2 Then
+                    Return True
+                End If
+
+            ElseIf attacker.TypeIs = 4 Then
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+                Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+
+                If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT TOP
+                    Do Until y_check = y_sel - 1 And x_check = x_sel + 1
+                        y_check -= 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT TOP
+                    Do Until y_check = y_sel - 1 And x_check = x_sel - 1
+                        y_check -= 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT BOTTOM
+                    Do Until y_check = y_sel + 1 And x_check = x_sel + 1
+                        y_check += 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT BOTTOM
+                    Do Until y_check = y_sel + 1 And x_check = x_sel - 1
+                        y_check += 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl And pnl IsNot vicpnl Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                End If
+
+            ElseIf attacker.TypeIs = 5 Then
+                If x_sel = x_cur - 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur - 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur - 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur + 1 Then
+                    Return True
+                ElseIf x_sel = x_cur + 1 And y_sel = y_cur Then
+                    Return True
+                ElseIf x_sel = x_cur And y_sel = y_cur - 1 Then
+                    Return True
+                End If
+
+            ElseIf attacker.TypeIs = 6 Then
+                If x_sel = x_cur Then
+                    If y_cur - y_sel > 0 Then
+                        For i As Integer = y_sel To y_cur
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf y_cur - y_sel < 0 Then
+                        For i As Integer = y_cur To y_sel
+                            Dim pnl As Panel = DirectCast(board(x_sel, i), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = y_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                ElseIf y_sel = y_cur Then
+                    If x_cur - x_sel > 0 Then
+                        For i As Integer = x_sel To x_cur
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_cur - 1 Then
+                                Return True
+                            End If
+                        Next
+                    ElseIf x_cur - x_sel < 0 Then
+                        For i As Integer = x_cur To x_sel
+                            Dim pnl As Panel = DirectCast(board(i, y_sel), Panel)
+                            Dim vicpnl As Panel = DirectCast(victim.Parent, Panel)
+                            Dim attpnl As Panel = DirectCast(attacker.Parent, Panel)
+                            If pnl.Controls.Count = 1 And pnl IsNot vicpnl And pnl IsNot attpnl Then
+                                Return False
+                            ElseIf i = x_sel - 1 Then
+                                Return True
+                            End If
+                        Next
+                    End If
+                End If
+
+                Dim x_check As Integer = x_cur
+                Dim y_check As Integer = y_cur
+                Dim attpnl1 As Panel = DirectCast(attacker.Parent, Panel)
+                Dim vicpnl1 As Panel = DirectCast(victim.Parent, Panel)
+
+                If y_cur - y_sel > 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel > 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT TOP
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check -= 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel < 0 Then
+                    'TO THE RIGHT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check += 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                ElseIf y_cur - y_sel < 0 And x_cur - x_sel > 0 Then
+                    'TO THE LEFT BOTTOM
+                    Do Until y_check = y_sel And x_check = x_sel
+                        y_check += 1
+                        x_check -= 1
+                        Dim pnl As Panel = DirectCast(board(x_check, y_check), Panel)
+                        If pnl.Controls.Count = 1 And pnl IsNot attpnl1 And pnl IsNot vicpnl1 Then
+                            Return False
+                        End If
+                    Loop
+                    Return True
+                End If
+
             End If
         End If
 
@@ -794,22 +1622,6 @@ Public Class Form1
         victim_place.Controls.Clear()
         victim_place.Controls.Add(attacker)
 
-        'Get the y diminsion to see if we should make it a king
-        'If moving_checker.TypeIs = 1 Then
-        '    For x As Integer = 0 To board.GetUpperBound(0)
-        '        For y As Integer = 0 To board.GetUpperBound(1)
-        '            If board(x, y) Is pnl_to_move_to Then
-        '                If moving_checker.Player = 1 AndAlso y = 0 Then
-        '                    'moving_checker.IsKing = True
-        '                ElseIf moving_checker.Player = 2 AndAlso y = 7 Then
-        '                    'moving_checker.IsKing = True
-        '                End If
-        '                Exit For
-        '            End If
-        '        Next
-        '    Next
-        'End If
-
         If attacker.TypeIs = 1 Then
             attacker.PawnFirst = False
         End If
@@ -830,23 +1642,6 @@ Public Class Form1
         Dim p1_count As Integer = 1
         Dim p2_count As Integer = 1
 
-        ''Loop through the board
-        'For x As Integer = 0 To board.GetUpperBound(0)
-        '    For y As Integer = 0 To board.GetUpperBound(1)
-        '        'Check if the panel has a checker
-        '        If board(x, y).Controls.Count > 0 Then
-        '            'Check if the checker is p1 or p2
-        '            Dim check As Piece = DirectCast(board(x, y).Controls(0), Piece)
-
-        '            If check.Player = 1 Then
-        '                p1_count += 1
-        '            ElseIf check.Player = 2 Then
-        '                p2_count += 1
-        '            End If
-        '        End If
-        '    Next
-        'Next
-
         If sender.TypeIs = 5 Then
             If sender.Player = 1 Then
                 p1_count = 0
@@ -858,11 +1653,9 @@ Public Class Form1
         'Check if p1 or p2 count is 0
         If p1_count = 0 Then
             MessageBox.Show("Player2 wins!")
-
             Call NewGame()
         ElseIf p2_count = 0 Then
             MessageBox.Show("Player1 wins!")
-
             Call NewGame()
         End If
 
