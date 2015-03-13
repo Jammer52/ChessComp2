@@ -1610,6 +1610,8 @@ Public Class Form1
 
     Private Sub TakePiece(ByVal attacker As Piece, ByVal victim As Piece)
 
+        Dim s As String = "0"
+
         'Unselect the moving checker
         attacker.IsSelected = False
 
@@ -1620,6 +1622,46 @@ Public Class Form1
         'Add the checker to the new panel
         Dim victim_place As Panel = DirectCast(victim.Parent, Panel)
         victim_place.Controls.Clear()
+
+        If attacker.TypeIs = 1 Then
+            For x As Integer = 0 To board.GetUpperBound(0)
+                For y As Integer = 0 To board.GetUpperBound(1)
+                    If board(x, y) Is victim_place Then
+                        If attacker.Player = 1 AndAlso y = 0 Then
+                            Do Until IsNumeric(s) = True And CInt(s) < 5 And CInt(s) > 0
+                                s = InputBox("Please select what piece you want" & vbCrLf & vbTab & "1 - Queen" & vbCrLf & vbTab & "2 - Rook" & vbCrLf & vbTab & "3 - Bishop" & vbCrLf & vbTab & "4 - Knight", "Piece Chooser")
+                            Loop
+                            Select Case s
+                                Case "1"
+                                    attacker.TypeIs = 6
+                                Case "2"
+                                    attacker.TypeIs = 2
+                                Case "3"
+                                    attacker.TypeIs = 4
+                                Case "4"
+                                    attacker.TypeIs = 3
+                            End Select
+                        ElseIf attacker.Player = 2 AndAlso y = 7 Then
+                            Do Until IsNumeric(s) = True And CInt(s) < 5 And CInt(s) > 0
+                                s = InputBox("Please select what piece you want" & vbCrLf & vbTab & "1 - Queen" & vbCrLf & vbTab & "2 - Rook" & vbCrLf & vbTab & "3 - Bishop" & vbCrLf & vbTab & "4 - Knight", "Piece Chooser")
+                            Loop
+                            Select Case s
+                                Case "1"
+                                    attacker.TypeIs = 6
+                                Case "2"
+                                    attacker.TypeIs = 2
+                                Case "3"
+                                    attacker.TypeIs = 4
+                                Case "4"
+                                    attacker.TypeIs = 3
+                            End Select
+                        End If
+                        Exit For
+                    End If
+                Next
+            Next
+        End If
+
         victim_place.Controls.Add(attacker)
 
         If attacker.TypeIs = 1 Then
